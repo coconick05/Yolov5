@@ -11,6 +11,24 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- Estilo: títulos en amarillo ---
+st.markdown(
+    """
+    <style>
+    h1, h2, h3,
+    [data-testid="stHeading"] h1,
+    [data-testid="stHeading"] h2,
+    [data-testid="stHeading"] h3,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #FFD700 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 @st.cache_resource
 def load_model():
     try:
@@ -22,6 +40,13 @@ def load_model():
         return None
 
 st.title("🔍 Detección de Objetos en Imágenes")
+
+# --- Imagen debajo del primer título ---
+try:
+    st.image("detecdog.jpg", use_container_width=True)
+except Exception as e:
+    st.warning(f"No se pudo cargar detecdog.jpg: {str(e)}")
+
 st.markdown("Esta aplicación utiliza YOLOv5 para detectar objetos en imágenes capturadas con tu cámara.")
 
 with st.spinner("Cargando modelo YOLOv5..."):
@@ -40,14 +65,9 @@ if model:
     if picture:
         bytes_data = picture.getvalue()
 
-        # Decodificar con Pillow en lugar de cv2 (evita dependencia libGL)
-        #pil_img  = Image.open(io.BytesIO(bytes_data)).convert("RGB")
-        #np_img   = np.array(pil_img)   # array RGB
-
         pil_img = Image.open(io.BytesIO(bytes_data)).convert("RGB")
         np_img  = np.array(pil_img)[..., ::-1]  # RGB → BGR para que YOLO procese bien
 
-        
         with st.spinner("Detectando objetos..."):
             try:
                 results = model(
